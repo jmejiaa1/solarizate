@@ -1,0 +1,1 @@
+para poder iniciar la api de node se  debe ingresar a la carpeta donde se  tiene el backent y iniciar la  appi  con el comando node app.js,  este  debera responder  con un titulo donde  escuche el puerto 3000
