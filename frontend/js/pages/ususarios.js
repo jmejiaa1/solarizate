@@ -128,7 +128,7 @@ async function cargarDatosIniciales() {
   }
 }
 
-// Función para mostrar/ocultar indicador de carga
+// Función para mostrar/ocultar indicador de carga barra de progreso
 function mostrarCargando(mostrar) {
   const formDiv = document.getElementById('hogar-form');
   if (mostrar) {
@@ -312,7 +312,7 @@ function renderHogarForm() {
           </div>
 
           <button type="submit">Crear Hogar</button>
-          <button type="button" onclick="calcularEstimados()">Calcular Estimados</button>
+          
         </form>
       </div>
 
