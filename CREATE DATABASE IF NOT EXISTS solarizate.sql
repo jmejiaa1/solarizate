@@ -68,7 +68,7 @@ CREATE TABLE electrodomestico_hogar (
 
 CREATE TABLE panel_solar (
    id INT AUTO_INCREMENT PRIMARY KEY,
-   poterncia DECIMAL(10, 2) NOT NULL,
+   potencia DECIMAL(10, 2) NOT NULL,
    tipo VARCHAR(50) NOT NULL, -- Tipo de panel solar por ejemplo: monocristalino, policristalino, 
    energia_generada DECIMAL(10, 2) NOT NULL
 )engine=InnoDB;
@@ -93,7 +93,7 @@ insert into rol (tipo) values
 
 
 
-insert into usuario (nombre, documento, correo, CONTRASENA, fk_roll) values
+insert into usuario (nombre, documento, correo, contrasena, fk_roll) values
 ('diego', '123', 'pepito@gmail.com', '1234', 1),
 ('juan', '456', 'lolito@aaa.com', '1234', 1),
 ('pedro', '789', 'ppppp@ssss.com', '1234', 2),
@@ -107,30 +107,6 @@ insert into region (nombre) values
 ('amazonia'),
 ('insular');
 
-insert into hogar (direccion, ciudad, fk_usuario, fk_region) values
-('calle 123', 'bogota', 1, 1),
-('calle 456', 'cartagena', 2, 2),
-('calle 789', 'medellin', 3, 3),
-('calle 101112', 'barranquilla', 4, 4);
-
-
-insert into electrodomestico (nombre, tipo, consumo, fk_hogar) values
-('refrigerador', 'Electrodomésticos de cocina', 150.00, 1),
-('microondas', 'Electrodomésticos de cocina', 100.00, 2),
-('lavadora', 'Grandes electrodomésticos', 200.00, 3),
-('televisor', 'Electrodomésticos de entretenimiento', 120.00, 4);
-
-insert into panel_solar (poterncia, energia_generada) values
-(300.00, 500.00),
-(400.00, 600.00),
-(500.00, 700.00),
-(600.00, 800.00);
-
-insert into instalacion (cantidad_pamel, fk_panel_solar, fk_hogar) values
-(2, 1, 1),
-(3, 2, 2),
-(4, 3, 3),
-(5, 4, 4);
 
 
 insert into panel_solar (poterncia, tipo, energia_generada) values
