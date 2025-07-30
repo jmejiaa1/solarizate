@@ -666,6 +666,29 @@ function mostrarHogares(hogares) {
           const eficiencia = Math.round((generacion / Math.max(consumo, 1)) * 100);
           const eficienciaWidth = Math.min((generacion / Math.max(consumo, 1)) * 100, 100);
           
+          // Determinar color y clase de la barra de eficiencia
+          let eficienciaColorClass = '';
+          let eficienciaStatus = '';
+          if (eficiencia >= 120) {
+            eficienciaColorClass = 'efficiency-excellent'; // Verde brillante
+            eficienciaStatus = 'Excelente';
+          } else if (eficiencia >= 100) {
+            eficienciaColorClass = 'efficiency-very-good'; // Verde
+            eficienciaStatus = 'Muy Buena';
+          } else if (eficiencia >= 80) {
+            eficienciaColorClass = 'efficiency-good'; // Verde claro
+            eficienciaStatus = 'Buena';
+          } else if (eficiencia >= 60) {
+            eficienciaColorClass = 'efficiency-regular'; // Amarillo
+            eficienciaStatus = 'Regular';
+          } else if (eficiencia >= 40) {
+            eficienciaColorClass = 'efficiency-poor'; // Naranja
+            eficienciaStatus = 'Deficiente';
+          } else {
+            eficienciaColorClass = 'efficiency-critical'; // Rojo
+            eficienciaStatus = 'Crítica';
+          }
+          
           return `
             <div class="hogar-card">
               <h4>📍 ${direccion}</h4>
@@ -675,10 +698,12 @@ function mostrarHogares(hogares) {
                 <p><strong>🔌 Consumo Estimado:</strong> <span class="consumption">${consumo} W</span></p>
                 <p class="${balanceClass}"><strong>📊 Balance:</strong> ${Math.abs(balance)} W (${balanceText})</p>
               </div>
-              <div class="efficiency-bar">
-                <div class="efficiency-fill" style="width: ${eficienciaWidth}%"></div>
+              <div class="efficiency-container">
+                <div class="efficiency-bar">
+                  <div class="efficiency-fill ${eficienciaColorClass}" style="width: ${eficienciaWidth}%"></div>
+                </div>
+                <p class="efficiency-text">Eficiencia: ${eficiencia}% - <span class="efficiency-status ${eficienciaColorClass}">${eficienciaStatus}</span></p>
               </div>
-              <p class="efficiency-text">Eficiencia: ${eficiencia}%</p>
               <div class="hogar-actions">
                 <button onclick="verDetalleHogar(${hogar.id})" class="btn-info" data-tooltip="Ver información detallada">👁️ Ver Detalle</button>
                 <button onclick="editarHogar(${hogar.id})" class="btn-edit" data-tooltip="Modificar configuración del hogar">✏️ Editar</button>
@@ -704,24 +729,154 @@ function mostrarHogares(hogares) {
 // Función para ver detalle del hogar
 async function verDetalleHogar(id) {
   try {
-    const response = await fetch(`${HOGAR_API_URL}/${id}`);
-    const hogar = await response.json();
+    console.log('Cargando detalles del hogar:', id);
     
-    // Crear modal o sección expandida para mostrar detalles
+    // Obtener datos del hogar
+    const response = await fetch(`${HOGAR_API_URL}/${id}`);
+    if (!response.ok) {
+      throw new Error(`Error al cargar hogar: ${response.status}`);
+    }
+    const hogar = await response.json();
+    console.log('Datos del hogar recibidos:', hogar);
+    
+    // Obtener información de paneles y electrodomésticos usando endpoints alternativos
+    let panelesHogar = [];
+    let electrodomesticosHogar = [];
+    
+    // Intentar obtener paneles del hogar - usando diferentes métodos
+    try {
+      // Método 1: Verificar si el hogar ya incluye los paneles
+      if (hogar.paneles && Array.isArray(hogar.paneles)) {
+        panelesHogar = hogar.paneles;
+        console.log('Paneles encontrados en hogar:', panelesHogar);
+      } else {
+        // Método 2: Intentar endpoint específico para paneles del hogar
+        try {
+          const panelesResponse = await fetch(`${HOGAR_API_URL}/${id}/paneles`);
+          if (panelesResponse.ok) {
+            panelesHogar = await panelesResponse.json();
+            console.log('Paneles obtenidos de endpoint específico:', panelesHogar);
+          }
+        } catch (error) {
+          console.warn('Endpoint específico de paneles no disponible:', error);
+        }
+        
+        // Método 3: Obtener desde tabla de relación electrodomesticoHogar si existe
+        if (panelesHogar.length === 0) {
+          try {
+            const relacionResponse = await fetch(`http://localhost:3000/api/eHogares/hogar/${id}`);
+            if (relacionResponse.ok) {
+              const relaciones = await relacionResponse.json();
+              console.log('Relaciones encontradas:', relaciones);
+              
+              // Filtrar solo paneles (si tienen energia_generada o son de tipo panel)
+              panelesHogar = relaciones.filter(item => 
+                item.energia_generada > 0 || 
+                (item.tipo && item.tipo.toLowerCase().includes('panel')) ||
+                (item.nombre && item.nombre.toLowerCase().includes('panel'))
+              );
+              console.log('Paneles filtrados de relaciones:', panelesHogar);
+            }
+          } catch (error) {
+            console.warn('No se pudo obtener desde relaciones:', error);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Error al cargar paneles del hogar:', error);
+    }
+    
+    // Intentar obtener electrodomésticos del hogar
+    try {
+      // Método 1: Verificar si el hogar ya incluye los electrodomésticos
+      if (hogar.electrodomesticos && Array.isArray(hogar.electrodomesticos)) {
+        electrodomesticosHogar = hogar.electrodomesticos;
+        console.log('Electrodomésticos encontrados en hogar:', electrodomesticosHogar);
+      } else {
+        // Método 2: Intentar endpoint específico
+        try {
+          const electroResponse = await fetch(`${HOGAR_API_URL}/${id}/electrodomesticos`);
+          if (electroResponse.ok) {
+            electrodomesticosHogar = await electroResponse.json();
+            console.log('Electrodomésticos obtenidos de endpoint específico:', electrodomesticosHogar);
+          }
+        } catch (error) {
+          console.warn('Endpoint específico de electrodomésticos no disponible:', error);
+        }
+        
+        // Método 3: Obtener desde tabla de relación
+        if (electrodomesticosHogar.length === 0) {
+          try {
+            const relacionResponse = await fetch(`http://localhost:3000/api/eHogares/hogar/${id}`);
+            if (relacionResponse.ok) {
+              const relaciones = await relacionResponse.json();
+              
+              // Filtrar solo electrodomésticos (si tienen consumo o no son paneles)
+              electrodomesticosHogar = relaciones.filter(item => 
+                (item.consumo > 0 && !item.energia_generada) || 
+                (item.tipo && !item.tipo.toLowerCase().includes('panel')) ||
+                (item.nombre && !item.nombre.toLowerCase().includes('panel'))
+              );
+              console.log('Electrodomésticos filtrados de relaciones:', electrodomesticosHogar);
+            }
+          } catch (error) {
+            console.warn('No se pudo obtener electrodomésticos desde relaciones:', error);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Error al cargar electrodomésticos del hogar:', error);
+    }
+    
+    console.log('Paneles finales para mostrar:', panelesHogar);
+    console.log('Electrodomésticos finales para mostrar:', electrodomesticosHogar);
+    
+    // Si aún no tenemos datos, intentar obtenerlos de forma alternativa
+    if (panelesHogar.length === 0 && electrodomesticosHogar.length === 0) {
+      console.log('No se encontraron equipos, intentando métodos alternativos...');
+      
+      // Crear datos de ejemplo basados en la generación y consumo del hogar
+      if (hogar.generacion_estimada > 0) {
+        // Estimar paneles basados en la generación
+        const estimatedPanels = Math.ceil(hogar.generacion_estimada / 300); // Asumiendo 300W por panel
+        panelesHogar = [{
+          tipo: 'Panel Solar Estimado',
+          potencia: 300,
+          energia_generada: Math.round(hogar.generacion_estimada / estimatedPanels),
+          cantidad: estimatedPanels
+        }];
+      }
+      
+      if (hogar.consumo_estimado > 0) {
+        // Estimar electrodomésticos basados en el consumo
+        electrodomesticosHogar = [{
+          nombre: 'Electrodomésticos del Hogar',
+          consumo: hogar.consumo_estimado,
+          cantidad: 1
+        }];
+      }
+      
+      console.log('Equipos estimados - Paneles:', panelesHogar);
+      console.log('Equipos estimados - Electrodomésticos:', electrodomesticosHogar);
+    }
+    
+    // Crear modal con información detallada
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Detalle del Hogar</h3>
+          <h3>🏠 Detalle del Hogar</h3>
           <button onclick="cerrarModal()" class="close-btn">&times;</button>
         </div>
         <div class="modal-body">
           <h4>📍 ${hogar.direccion}, ${hogar.ciudad}</h4>
+          
+          <!-- Estadísticas de energía -->
           <div class="detail-stats">
             <div class="stat-card">
               <h5>⚡ Generación</h5>
-              <p class="stat-value">${hogar.generacion_estimada} W</p>
+              <p class="stat-value positive">${hogar.generacion_estimada} W</p>
             </div>
             <div class="stat-card">
               <h5>🔌 Consumo</h5>
@@ -730,13 +885,109 @@ async function verDetalleHogar(id) {
             <div class="stat-card">
               <h5>📊 Balance</h5>
               <p class="stat-value ${hogar.generacion_estimada >= hogar.consumo_estimado ? 'positive' : 'negative'}">
-                ${hogar.generacion_estimada - hogar.consumo_estimado} W
+                ${Math.abs(hogar.generacion_estimada - hogar.consumo_estimado)} W
+                (${hogar.generacion_estimada >= hogar.consumo_estimado ? 'Excedente' : 'Déficit'})
               </p>
             </div>
           </div>
+          
+          <!-- Paneles Solares -->
+          <div class="equipment-section">
+            <h5>⚡ Paneles Solares Instalados</h5>
+            <div class="equipment-grid">
+              ${panelesHogar.length > 0 ? panelesHogar.map(panel => {
+                // Manejar diferentes estructuras de datos de paneles
+                const tipo = panel.tipo || panel.nombre || 'Panel Solar';
+                const potencia = panel.potencia || panel.energia_generada || 'N/A';
+                const energia = panel.energia_generada || panel.potencia || 0;
+                const cantidad = panel.cantidad || 1;
+                const total = energia * cantidad;
+                
+                return `
+                  <div class="equipment-card panel-card">
+                    <div class="equipment-header">
+                      <span class="equipment-icon">🔋</span>
+                      <h6>${tipo}</h6>
+                    </div>
+                    <div class="equipment-details">
+                      <p><strong>Potencia:</strong> <span>${potencia} W</span></p>
+                      <p><strong>Energía Generada:</strong> <span>${energia} W</span></p>
+                      <p><strong>Cantidad:</strong> <span>${cantidad} unidad(es)</span></p>
+                      <p><strong>Total:</strong> <span>${total} W</span></p>
+                    </div>
+                  </div>
+                `;
+              }).join('') : `
+                <div class="no-equipment">
+                  <p>🔋 No hay paneles solares registrados para este hogar</p>
+                  <p style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">
+                    Los paneles se registran al crear o editar el hogar
+                  </p>
+                  <button onclick="verDetalleHogar(${id})" class="btn-secondary" style="margin-top: 1rem; font-size: 0.8rem;">
+                    🔄 Recargar Datos
+                  </button>
+                </div>
+              `}
+            </div>
+          </div>
+          
+          <!-- Electrodomésticos -->
+          <div class="equipment-section">
+            <h5>🔌 Electrodomésticos</h5>
+            <div class="equipment-grid">
+              ${electrodomesticosHogar.length > 0 ? electrodomesticosHogar.map(electro => {
+                // Manejar diferentes estructuras de datos de electrodomésticos
+                const nombre = electro.nombre || electro.tipo || 'Electrodoméstico';
+                const consumo = electro.consumo || 0;
+                const cantidad = electro.cantidad || 1;
+                const total = consumo * cantidad;
+                
+                return `
+                  <div class="equipment-card electro-card">
+                    <div class="equipment-header">
+                      <span class="equipment-icon">🏠</span>
+                      <h6>${nombre}</h6>
+                    </div>
+                    <div class="equipment-details">
+                      <p><strong>Consumo:</strong> <span>${consumo} W</span></p>
+                      <p><strong>Cantidad:</strong> <span>${cantidad} unidad(es)</span></p>
+                      <p><strong>Total:</strong> <span>${total} W</span></p>
+                    </div>
+                  </div>
+                `;
+              }).join('') : `
+                <div class="no-equipment">
+                  <p>🔌 No hay electrodomésticos registrados para este hogar</p>
+                  <p style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">
+                    Los electrodomésticos se registran al crear o editar el hogar
+                  </p>
+                  <button onclick="verDetalleHogar(${id})" class="btn-secondary" style="margin-top: 1rem; font-size: 0.8rem;">
+                    🔄 Recargar Datos
+                  </button>
+                </div>
+              `}
+            </div>
+          </div>
+          
+          <!-- Recomendaciones -->
           <div class="recommendations">
             <h5>💡 Recomendaciones:</h5>
             ${generarRecomendaciones(hogar)}
+          </div>
+          
+          <!-- Información de depuración (temporal) -->
+          <div class="equipment-section" style="margin-top: 2rem; background: rgba(255, 255, 255, 0.02);">
+            <h5 style="color: #999; font-size: 0.9rem;">🔧 Información de Depuración</h5>
+            <div style="font-size: 0.8rem; color: #ccc; padding: 1rem;">
+              <p><strong>ID del Hogar:</strong> ${hogar.id}</p>
+              <p><strong>Paneles encontrados:</strong> ${panelesHogar.length} elementos</p>
+              <p><strong>Electrodomésticos encontrados:</strong> ${electrodomesticosHogar.length} elementos</p>
+              <p><strong>Estructura del hogar:</strong> ${Object.keys(hogar).join(', ')}</p>
+              <details style="margin-top: 0.5rem;">
+                <summary style="cursor: pointer; color: #4CAF50;">Ver datos completos del hogar</summary>
+                <pre style="background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; font-size: 0.7rem; overflow-x: auto;">${JSON.stringify(hogar, null, 2)}</pre>
+              </details>
+            </div>
           </div>
         </div>
       </div>
@@ -766,24 +1017,93 @@ async function verDetalleHogar(id) {
 // Función para generar recomendaciones
 function generarRecomendaciones(hogar) {
   const balance = hogar.generacion_estimada - hogar.consumo_estimado;
-  const eficiencia = (hogar.generacion_estimada / Math.max(hogar.consumo_estimado, 1)) * 100;
+  const eficiencia = Math.round((hogar.generacion_estimada / Math.max(hogar.consumo_estimado, 1)) * 100);
   
-  let recomendaciones = '';
+  let recomendaciones = '<div class="recommendations-grid">';
   
-  if (balance < 0) {
-    recomendaciones += '<p>🔋 Considera agregar más paneles solares para cubrir tu consumo.</p>';
-    recomendaciones += '<p>💡 Revisa electrodomésticos de alto consumo y considera reemplazarlos por versiones más eficientes.</p>';
-  } else if (balance > hogar.consumo_estimado * 0.5) {
-    recomendaciones += '<p>✅ Tienes un excelente excedente de energía.</p>';
-    recomendaciones += '<p>💰 Podrías considerar vender energía a la red eléctrica.</p>';
+  // Análisis de eficiencia
+  if (eficiencia >= 120) {
+    recomendaciones += `
+      <div class="recommendation-card excellent">
+        <h6>🌟 Sistema Excelente</h6>
+        <p>Tu eficiencia del ${eficiencia}% es excepcional. Considera vender el excedente a la red eléctrica o instalar baterías para almacenar energía.</p>
+      </div>
+    `;
+  } else if (eficiencia >= 100) {
+    recomendaciones += `
+      <div class="recommendation-card very-good">
+        <h6>✅ Sistema Muy Eficiente</h6>
+        <p>Con ${eficiencia}% de eficiencia, tu sistema cubre completamente tus necesidades. Podrías considerar agregar más electrodomésticos eficientes.</p>
+      </div>
+    `;
+  } else if (eficiencia >= 80) {
+    recomendaciones += `
+      <div class="recommendation-card good">
+        <h6>👍 Buen Rendimiento</h6>
+        <p>Tu eficiencia del ${eficiencia}% está bien. Considera agregar 1-2 paneles adicionales para alcanzar la autosuficiencia total.</p>
+      </div>
+    `;
+  } else if (eficiencia >= 60) {
+    recomendaciones += `
+      <div class="recommendation-card regular">
+        <h6>⚡ Mejora Necesaria</h6>
+        <p>Con ${eficiencia}% de eficiencia, necesitas más generación. Considera duplicar tus paneles solares o reducir el consumo.</p>
+      </div>
+    `;
   } else {
-    recomendaciones += '<p>⚖️ Tu sistema está bien balanceado.</p>';
-    recomendaciones += '<p>📈 Considera pequeños ajustes para optimizar aún más.</p>';
+    recomendaciones += `
+      <div class="recommendation-card critical">
+        <h6>🚨 Acción Urgente</h6>
+        <p>Tu eficiencia del ${eficiencia}% es crítica. Necesitas una revisión completa del sistema y posiblemente triplicar la capacidad de generación.</p>
+      </div>
+    `;
   }
   
-  if (eficiencia < 50) {
-    recomendaciones += '<p>⚠️ La eficiencia de tu sistema es baja. Revisa la configuración.</p>';
+  // Análisis de balance energético
+  if (balance < -500) {
+    recomendaciones += `
+      <div class="recommendation-card energy-deficit">
+        <h6>⚠️ Déficit Alto</h6>
+        <p>Tu déficit de ${Math.abs(balance)}W es significativo. Prioriza agregar paneles solares de alta capacidad y revisa electrodomésticos ineficientes.</p>
+      </div>
+    `;
+  } else if (balance < 0) {
+    recomendaciones += `
+      <div class="recommendation-card energy-minor-deficit">
+        <h6>📊 Déficit Menor</h6>
+        <p>Con un déficit de ${Math.abs(balance)}W, estás cerca del equilibrio. Unos pocos paneles adicionales resolverían el problema.</p>
+      </div>
+    `;
+  } else if (balance > 1000) {
+    recomendaciones += `
+      <div class="recommendation-card energy-surplus">
+        <h6>💚 Gran Excedente</h6>
+        <p>Tu excedente de ${balance}W es excelente. Considera instalar un sistema de baterías o conectarte a la red para vender energía.</p>
+      </div>
+    `;
+  } else if (balance > 0) {
+    recomendaciones += `
+      <div class="recommendation-card energy-balanced">
+        <h6>⚖️ Sistema Balanceado</h6>
+        <p>Tu excedente de ${balance}W indica un buen equilibrio. Tu sistema está bien optimizado.</p>
+      </div>
+    `;
   }
+  
+  // Recomendaciones específicas basadas en rangos
+  const generationKW = (hogar.generacion_estimada / 1000).toFixed(1);
+  const consumptionKW = (hogar.consumo_estimado / 1000).toFixed(1);
+  
+  recomendaciones += `
+    <div class="recommendation-card technical">
+      <h6>📈 Datos Técnicos</h6>
+      <p><strong>Generación:</strong> ${generationKW} kW/h</p>
+      <p><strong>Consumo:</strong> ${consumptionKW} kW/h</p>
+      <p><strong>Ahorro mensual estimado:</strong> $${Math.round(hogar.generacion_estimada * 0.15 * 24 * 30 / 1000)} (aprox.)</p>
+    </div>
+  `;
+  
+  recomendaciones += '</div>';
   
   return recomendaciones;
 }

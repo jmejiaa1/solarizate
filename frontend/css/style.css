@@ -1160,12 +1160,101 @@ button[type="button"]:hover {
 .efficiency-fill {
     height: 100%;
     background: #4CAF50;
+    transition: all 0.3s ease;
+}
+
+/* Estilos para diferentes niveles de eficiencia */
+.efficiency-fill.efficiency-critical {
+    background: linear-gradient(90deg, #f44336 0%, #d32f2f 100%);
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.3);
+}
+
+.efficiency-fill.efficiency-poor {
+    background: linear-gradient(90deg, #ff9800 0%, #f57c00 100%);
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.3);
+}
+
+.efficiency-fill.efficiency-regular {
+    background: linear-gradient(90deg, #ffeb3b 0%, #fbc02d 100%);
+    box-shadow: 0 0 10px rgba(255, 235, 59, 0.3);
+}
+
+.efficiency-fill.efficiency-good {
+    background: linear-gradient(90deg, #8bc34a 0%, #689f38 100%);
+    box-shadow: 0 0 10px rgba(139, 195, 74, 0.3);
+}
+
+.efficiency-fill.efficiency-very-good {
+    background: linear-gradient(90deg, #4caf50 0%, #388e3c 100%);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.efficiency-fill.efficiency-excellent {
+    background: linear-gradient(90deg, #00e676 0%, #00c853 100%);
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+    animation: excellent-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes excellent-glow {
+    from {
+        box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+    }
+    to {
+        box-shadow: 0 0 25px rgba(0, 230, 118, 0.6);
+    }
+}
+
+/* Estilos para el texto de estado de eficiencia */
+.efficiency-status.efficiency-critical {
+    color: #f44336;
+    font-weight: 600;
+}
+
+.efficiency-status.efficiency-poor {
+    color: #ff9800;
+    font-weight: 600;
+}
+
+.efficiency-status.efficiency-regular {
+    color: #ffeb3b;
+    font-weight: 600;
+}
+
+.efficiency-status.efficiency-good {
+    color: #8bc34a;
+    font-weight: 600;
+}
+
+.efficiency-status.efficiency-very-good {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+.efficiency-status.efficiency-excellent {
+    color: #00e676;
+    font-weight: 600;
+    text-shadow: 0 0 5px rgba(0, 230, 118, 0.3);
+}
+
+.efficiency-container {
+    margin: 1rem 0;
+}
+
+.efficiency-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .efficiency-text {
     font-size: 0.9rem;
-    color: #ccc;
-    margin-bottom: 1rem;
+    color: #fff;
+    margin: 0.5rem 0 1rem 0;
+    text-align: center;
 }
 
 .hogar-actions {
@@ -1619,9 +1708,290 @@ button[type="button"]:hover {
     margin-bottom: 1rem;
 }
 
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.recommendation-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-left: 4px solid #4CAF50;
+    border-radius: 8px;
+    padding: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.recommendation-card h6 {
+    color: #fff;
+    margin: 0 0 0.8rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.recommendation-card p {
+    color: #e0e0e0;
+    margin: 0.4rem 0;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+/* Colores específicos para diferentes tipos de recomendaciones */
+.recommendation-card.excellent {
+    border-left-color: #00e676;
+    background: rgba(0, 230, 118, 0.1);
+}
+
+.recommendation-card.excellent h6 {
+    color: #00e676;
+}
+
+.recommendation-card.very-good {
+    border-left-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.recommendation-card.very-good h6 {
+    color: #4caf50;
+}
+
+.recommendation-card.good {
+    border-left-color: #8bc34a;
+    background: rgba(139, 195, 74, 0.1);
+}
+
+.recommendation-card.good h6 {
+    color: #8bc34a;
+}
+
+.recommendation-card.regular {
+    border-left-color: #ffeb3b;
+    background: rgba(255, 235, 59, 0.1);
+}
+
+.recommendation-card.regular h6 {
+    color: #ffeb3b;
+}
+
+.recommendation-card.critical {
+    border-left-color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.recommendation-card.critical h6 {
+    color: #f44336;
+}
+
+.recommendation-card.energy-deficit {
+    border-left-color: #ff5722;
+    background: rgba(255, 87, 34, 0.1);
+}
+
+.recommendation-card.energy-deficit h6 {
+    color: #ff5722;
+}
+
+.recommendation-card.energy-minor-deficit {
+    border-left-color: #ff9800;
+    background: rgba(255, 152, 0, 0.1);
+}
+
+.recommendation-card.energy-minor-deficit h6 {
+    color: #ff9800;
+}
+
+.recommendation-card.energy-surplus {
+    border-left-color: #00bcd4;
+    background: rgba(0, 188, 212, 0.1);
+}
+
+.recommendation-card.energy-surplus h6 {
+    color: #00bcd4;
+}
+
+.recommendation-card.energy-balanced {
+    border-left-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.recommendation-card.energy-balanced h6 {
+    color: #4caf50;
+}
+
+.recommendation-card.technical {
+    border-left-color: #2196f3;
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.recommendation-card.technical h6 {
+    color: #2196f3;
+}
+
+.recommendation-card.technical p strong {
+    color: #fff;
+}
+
+/* Responsive para recomendaciones */
+@media (max-width: 768px) {
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .recommendation-card {
+        padding: 1rem;
+    }
+}
+
 .recommendations p {
     margin-bottom: 0.8rem;
     line-height: 1.5;
+}
+
+/* Estilos para secciones de equipos en detalle del hogar */
+.equipment-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.equipment-section h5 {
+    color: #4CAF50;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+.equipment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.equipment-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.equipment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.equipment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.equipment-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(76, 175, 80, 0.2);
+}
+
+.panel-card .equipment-icon {
+    background: rgba(255, 193, 7, 0.2);
+}
+
+.electro-card .equipment-icon {
+    background: rgba(33, 150, 243, 0.2);
+}
+
+.equipment-header h6 {
+    color: #fff;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.equipment-details {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.equipment-details p {
+    color: #e0e0e0;
+    margin: 0;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.equipment-details p strong {
+    color: #fff;
+    font-weight: 500;
+}
+
+.equipment-details p:last-child {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+.no-equipment {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.no-equipment p {
+    color: #ccc;
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Responsive para equipos */
+@media (max-width: 768px) {
+    .equipment-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .equipment-section {
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .equipment-card {
+        padding: 1rem;
+    }
+    
+    .equipment-header {
+        gap: 0.5rem;
+    }
+    
+    .equipment-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1.3rem;
+    }
 }
 
 /* Responsive */
