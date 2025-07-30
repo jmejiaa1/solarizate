@@ -277,7 +277,7 @@ function renderHogarForm() {
               <div class="panel-item">
                 <select name="panel_id" required>
                   <option value="">Seleccione un panel solar</option>
-                  ${panelesSolares.length > 0 ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}Kw/h) - ${panel.energia_generada}W generados</option>`).join('') : '<option value="">No hay paneles disponibles</option>'}
+                  ${panelesSolares.length > 0 ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}w) - ${panel.energia_generada}kw/h generados</option>`).join('') : '<option value="">No hay paneles disponibles</option>'}
                 </select>
                 <input type="number" name="panel_cantidad" placeholder="Cantidad" min="1" required>
                 <button type="button" onclick="eliminarPanel(this)">Eliminar</button>
@@ -292,7 +292,7 @@ function renderHogarForm() {
               <div class="electrodomestico-item">
                 <select name="electrodomestico_id" required>
                   <option value="">Seleccione un electrodoméstico</option>
-                  ${electrodomesticos.length > 0 ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} W</option>`).join('') : '<option value="">No hay electrodomésticos disponibles</option>'}
+                  ${electrodomesticos.length > 0 ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} kw/h</option>`).join('') : '<option value="">No hay electrodomésticos disponibles</option>'}
                 </select>
                 <input type="number" name="electrodomestico_cantidad" placeholder="Cantidad" min="1" required>
                 <button type="button" onclick="eliminarElectrodomestico(this)">Eliminar</button>
@@ -302,12 +302,12 @@ function renderHogarForm() {
           </div>
 
           <div class="form-group">
-            <label for="generacion_estimada">Generación Estimada (W):</label>
+            <label for="generacion_estimada">Generación Estimada (kw/h):</label>
             <input type="number" id="generacion_estimada" name="generacion_estimada" readonly>
           </div>
 
           <div class="form-group">
-            <label for="consumo_estimado">Consumo Estimado (W):</label>
+            <label for="consumo_estimado">Consumo Estimado (kw/h):</label>
             <input type="number" id="consumo_estimado" name="consumo_estimado" readonly>
           </div>
 
@@ -345,7 +345,7 @@ function agregarPanel() {
   if (!container) return;
 
   const panelesOptions = Array.isArray(panelesSolares) && panelesSolares.length > 0 
-    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}W generados</option>`).join('')
+    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada} kw/h generados</option>`).join('')
     : '<option value="">No hay paneles disponibles</option>';
 
   const newPanel = document.createElement('div');
@@ -376,7 +376,7 @@ function agregarElectrodomestico() {
   if (!container) return;
 
   const electroOptions = Array.isArray(electrodomesticos) && electrodomesticos.length > 0
-    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} W</option>`).join('')
+    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} kw/h</option>`).join('')
     : '<option value="">No hay electrodomésticos disponibles</option>';
 
   const newElectro = document.createElement('div');
@@ -694,9 +694,9 @@ function mostrarHogares(hogares) {
               <h4>📍 ${direccion}</h4>
               <p><strong>🏙️ Ciudad:</strong> ${ciudad}</p>
               <div class="energy-stats">
-                <p><strong>⚡ Generación Estimada:</strong> <span class="generation">${generacion} W</span></p>
-                <p><strong>🔌 Consumo Estimado:</strong> <span class="consumption">${consumo} W</span></p>
-                <p class="${balanceClass}"><strong>📊 Balance:</strong> ${Math.abs(balance)} W (${balanceText})</p>
+                <p><strong>⚡ Generación Estimada:</strong> <span class="generation">${generacion} kw/h</span></p>
+                <p><strong>🔌 Consumo Estimado:</strong> <span class="consumption">${consumo} kw/h</span></p>
+                <p class="${balanceClass}"><strong>📊 Balance:</strong> ${Math.abs(balance)} kw/h (${balanceText})</p>
               </div>
               <div class="efficiency-container">
                 <div class="efficiency-bar">
@@ -876,16 +876,16 @@ async function verDetalleHogar(id) {
           <div class="detail-stats">
             <div class="stat-card">
               <h5>⚡ Generación</h5>
-              <p class="stat-value positive">${hogar.generacion_estimada} W</p>
+              <p class="stat-value positive">${hogar.generacion_estimada} kw/h</p>
             </div>
             <div class="stat-card">
               <h5>🔌 Consumo</h5>
-              <p class="stat-value">${hogar.consumo_estimado} W</p>
+              <p class="stat-value">${hogar.consumo_estimado} kw/h</p>
             </div>
             <div class="stat-card">
               <h5>📊 Balance</h5>
               <p class="stat-value ${hogar.generacion_estimada >= hogar.consumo_estimado ? 'positive' : 'negative'}">
-                ${Math.abs(hogar.generacion_estimada - hogar.consumo_estimado)} W
+                ${Math.abs(hogar.generacion_estimada - hogar.consumo_estimado)} kw/h
                 (${hogar.generacion_estimada >= hogar.consumo_estimado ? 'Excedente' : 'Déficit'})
               </p>
             </div>
@@ -911,7 +911,7 @@ async function verDetalleHogar(id) {
                     </div>
                     <div class="equipment-details">
                       <p><strong>Potencia:</strong> <span>${potencia} W</span></p>
-                      <p><strong>Energía Generada:</strong> <span>${energia} W</span></p>
+                      <p><strong>Energía Generada:</strong> <span>${energia} kw/h</span></p>
                       <p><strong>Cantidad:</strong> <span>${cantidad} unidad(es)</span></p>
                       <p><strong>Total:</strong> <span>${total} W</span></p>
                     </div>
@@ -949,7 +949,7 @@ async function verDetalleHogar(id) {
                       <h6>${nombre}</h6>
                     </div>
                     <div class="equipment-details">
-                      <p><strong>Consumo:</strong> <span>${consumo} W</span></p>
+                      <p><strong>Consumo:</strong> <span>${consumo} kw/h</span></p>
                       <p><strong>Cantidad:</strong> <span>${cantidad} unidad(es)</span></p>
                       <p><strong>Total:</strong> <span>${total} W</span></p>
                     </div>
@@ -969,13 +969,13 @@ async function verDetalleHogar(id) {
             </div>
           </div>
           
-          <!-- Recomendaciones -->
+          <!-- Recomendaciones (opcional) -->
           <div class="recommendations">
             <h5>💡 Recomendaciones:</h5>
             ${generarRecomendaciones(hogar)}
           </div>
           
-          <!-- Información de depuración (temporal) -->
+          <!-- Información de depuración (temporal no solo era para visualizar el estado del hogar esta comentada porque no  es necesaria) 
           <div class="equipment-section" style="margin-top: 2rem; background: rgba(255, 255, 255, 0.02);">
             <h5 style="color: #999; font-size: 0.9rem;">🔧 Información de Depuración</h5>
             <div style="font-size: 0.8rem; color: #ccc; padding: 1rem;">
@@ -988,7 +988,7 @@ async function verDetalleHogar(id) {
                 <pre style="background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; font-size: 0.7rem; overflow-x: auto;">${JSON.stringify(hogar, null, 2)}</pre>
               </details>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     `;
@@ -1071,26 +1071,27 @@ function generarRecomendaciones(hogar) {
     recomendaciones += `
       <div class="recommendation-card energy-minor-deficit">
         <h6>📊 Déficit Menor</h6>
-        <p>Con un déficit de ${Math.abs(balance)}W, estás cerca del equilibrio. Unos pocos paneles adicionales resolverían el problema.</p>
+        <p>Con un déficit de ${Math.abs(balance)}kw/h, estás cerca del equilibrio. Unos pocos paneles adicionales resolverían el problema.</p>
       </div>
     `;
   } else if (balance > 1000) {
     recomendaciones += `
       <div class="recommendation-card energy-surplus">
         <h6>💚 Gran Excedente</h6>
-        <p>Tu excedente de ${balance}W es excelente. Considera instalar un sistema de baterías o conectarte a la red para vender energía.</p>
+        <p>Tu excedente de ${balance}kw/h es excelente. Considera instalar un sistema de baterías o conectarte a la red para vender energía.</p>
       </div>
     `;
   } else if (balance > 0) {
     recomendaciones += `
       <div class="recommendation-card energy-balanced">
         <h6>⚖️ Sistema Balanceado</h6>
-        <p>Tu excedente de ${balance}W indica un buen equilibrio. Tu sistema está bien optimizado.</p>
+        <p>Tu excedente de ${balance}kw/h indica un buen equilibrio. Tu sistema está bien optimizado.</p>
       </div>
     `;
   }
   
-  // Recomendaciones específicas basadas en rangos
+  /*
+  // Recomendaciones específicas basadas en rangos esta funcion la  tengo comentada en la linea 972 ya que no es necesaria por ahora
   const generationKW = (hogar.generacion_estimada / 1000).toFixed(1);
   const consumptionKW = (hogar.consumo_estimado / 1000).toFixed(1);
   
@@ -1099,10 +1100,11 @@ function generarRecomendaciones(hogar) {
       <h6>📈 Datos Técnicos</h6>
       <p><strong>Generación:</strong> ${generationKW} kW/h</p>
       <p><strong>Consumo:</strong> ${consumptionKW} kW/h</p>
-      <p><strong>Ahorro mensual estimado:</strong> $${Math.round(hogar.generacion_estimada * 0.15 * 24 * 30 / 1000)} (aprox.)</p>
+     <!--<p><strong>Ahorro mensual estimado:</strong> $${Math.round(hogar.generacion_estimada * 0.15 * 24 * 30 / 1000)} (aprox.)</p> -->
+      
     </div>
   `;
-  
+   */ 
   recomendaciones += '</div>';
   
   return recomendaciones;
@@ -1214,12 +1216,12 @@ function mostrarModalEdicion(hogar) {
           </div>
 
           <div class="form-group">
-            <label for="edit-generacion-estimada">⚡ Generación Estimada (W):</label>
+            <label for="edit-generacion-estimada">⚡ Generación Estimada (kw/h):</label>
             <input type="number" id="edit-generacion-estimada" name="generacion_estimada" readonly value="${hogar.generacion_estimada || 0}">
           </div>
 
           <div class="form-group">
-            <label for="edit-consumo-estimado">🔌 Consumo Estimado (W):</label>
+            <label for="edit-consumo-estimado">🔌 Consumo Estimado (kw/h):</label>
             <input type="number" id="edit-consumo-estimado" name="consumo_estimado" readonly value="${hogar.consumo_estimado || 0}">
           </div>
 
@@ -1273,7 +1275,7 @@ async function cargarPanelesExistentes(hogarId) {
     const container = document.getElementById('edit-paneles-container');
     
     const panelesOptions = Array.isArray(panelesSolares) && panelesSolares.length > 0 
-      ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}W generados</option>`).join('')
+      ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada} kw/h generados</option>`).join('')
       : '<option value="">No hay paneles disponibles</option>';
     
     // Agregar al menos un panel vacío para edición
@@ -1299,7 +1301,7 @@ async function cargarElectrodomesticosExistentes(hogarId) {
     const container = document.getElementById('edit-electrodomesticos-container');
     
     const electroOptions = Array.isArray(electrodomesticos) && electrodomesticos.length > 0
-      ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} W</option>`).join('')
+      ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} kw/h</option>`).join('')
       : '<option value="">No hay electrodomésticos disponibles</option>';
     
     // Agregar al menos un electrodoméstico vacío para edición
@@ -1325,7 +1327,7 @@ function agregarPanelEdicion() {
   if (!container) return;
 
   const panelesOptions = Array.isArray(panelesSolares) && panelesSolares.length > 0 
-    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}W generados</option>`).join('')
+    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada} kw/h generados</option>`).join('')
     : '<option value="">No hay paneles disponibles</option>';
 
   const newPanel = document.createElement('div');
@@ -1358,7 +1360,7 @@ function agregarElectrodomesticoEdicion() {
   if (!container) return;
 
   const electroOptions = Array.isArray(electrodomesticos) && electrodomesticos.length > 0
-    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} W</option>`).join('')
+    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} kw/h</option>`).join('')
     : '<option value="">No hay electrodomésticos disponibles</option>';
 
   const newElectro = document.createElement('div');
