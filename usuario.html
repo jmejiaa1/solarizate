@@ -17,6 +17,14 @@
     <title>Solarizate</title>
   </head>
   <body>
+    <!-- Overlay de transición de página -->
+    <div class="page-transition" id="page-transition">
+      <div class="page-transition-content">
+        <div class="page-transition-spinner"></div>
+        <div class="page-transition-text">Cargando...</div>
+      </div>
+    </div>
+
     <!--Header-->
 
     <header class="header" id="header">
@@ -32,32 +40,33 @@
               <a href="indexUsuario.html" class="navLink active-link"> Inicio </a>
             </li>
 
-               <li class="navItem">
-              <a href="#" onclick="cerrarSesion()" class="navLink active-link"> Cerrar Sesión </a>
+            <li class="navItem">
+              <a href="#" onclick="cerrarSesionConTransicion()" class="navLink active-link">Salir</a>
             </li>
 
             <li class="navItem">
              <!-- Mostrar solo el nombre de usuario en la barra de navegación -->
-            <script>
-              //  los datos del usuario están guardados en localStorage como JSON
-              document.addEventListener("DOMContentLoaded", function() {
-              const userData = localStorage.getItem("currentUser");
-              if (userData) {
-                let nombre = userData;
-                try {
-                const userObj = JSON.parse(userData);
-                nombre = userObj.nombre || userData;
-                } catch (e) {
-                // Si no es JSON, usar el valor directamente
-                }
-                const nav = document.querySelector(".navList");
-                const userItem = document.createElement("li");
-                userItem.className = "navItem";
-                userItem.innerHTML = `<span class="navLink">Hola, ${nombre}</span>`;
-                nav.appendChild(userItem);
-              }
-              });
-            </script>
+                <script>
+                  //  los datos del usuario están guardados en localStorage
+                  document.addEventListener("DOMContentLoaded", function() {
+                  const userData = localStorage.getItem("currentUser");
+                  if (userData) {
+                    let nombre = userData;
+                    try {
+                    const userObj = JSON.parse(userData);
+                    nombre = userObj.nombre || userData;
+                    } catch (e) {
+                    // Si no es JSON, usar el valor directamente
+
+                    }
+                    const nav = document.querySelector(".navList");
+                    const userItem = document.createElement("li");
+                    userItem.className = "navItem";
+                    userItem.innerHTML = `<span class="navLink">Hola, ${nombre}</span>`;
+                    nav.appendChild(userItem);
+                    }
+                  });
+                </script>
             </li>
           </ul>
 
@@ -72,7 +81,7 @@
       </nav>
     </header>
 
-    <main class="main">
+    <main class="main page-fade-in">
 
 
           <div style="padding: 4rem 0;">
@@ -185,6 +194,9 @@
     <script src="/frontend/js/swiper-bundle.min.js"></script>
 
     <script src="/frontend/js/main.js"></script>
+    
+    <!-- Sistema de transiciones de página -->
+    <script src="/frontend/js/page-transitions.js"></script>
     
     <!-- Sistema de autenticación -->
     <script src="/frontend/js/auth.js"></script>

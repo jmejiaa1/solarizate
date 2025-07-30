@@ -57,11 +57,12 @@ exports.remove = async (req, res) => {
 
 },
 
-
+// controlador para manejar el inicio de sesion.
 exports.login = async (req, res) => {
     try {
         const { correo, contrasena } = req.body;
         
+        // Validar que se reciban los campos necesarios
         if (!correo || !contrasena) {
             return res.status(400).json({ error: 'Correo y contraseña son requeridos' });
         }
@@ -69,20 +70,21 @@ exports.login = async (req, res) => {
         // Buscar usuario por email
         const usuario = await Usuario.findByEmail(correo);
         
+        // Verificar si el usuario existe
         if (!usuario) {
-            return res.status(401).json({ error: 'Credenciales inválidas' });
+            return res.status(401).json({ error: '❎ el usuario o la contraseña son incorrectos' });
         }
 
-        // Verificar contraseña (en un sistema real deberías usar hash)
+        // Verificar contraseña 
         if (usuario.contrasena !== contrasena) {
-            return res.status(401).json({ error: 'Credenciales inválidas' });
+            return res.status(401).json({ error: '❎ el usuario o la contraseña son incorrectos' });
         }
 
         // Login exitoso - retornar datos del usuario (sin la contraseña)
         const { contrasena: _, ...usuarioSeguro } = usuario;
         res.json({ 
             message: 'Login exitoso',
-            currentUser: usuarioSeguro  // Cambiar de 'usuario' a 'currentUser'
+            currentUser: usuarioSeguro 
         });
 
     } catch (err) {

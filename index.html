@@ -17,6 +17,14 @@
     <title>Solarizate</title>
   </head>
   <body>
+    <!-- Overlay de transición de página -->
+    <div class="page-transition" id="page-transition">
+      <div class="page-transition-content">
+        <div class="page-transition-spinner"></div>
+        <div class="page-transition-text">Cargando...</div>
+      </div>
+    </div>
+
     <!--Header-->
 
     <header class="header" id="header">
@@ -50,7 +58,7 @@
       </nav>
     </header>
 
-    <main class="main">
+    <main class="main page-fade-in">
       <!--HOME-->
       <section class="home container" id="home">
         <div class="swiper home-swiper">
@@ -357,5 +365,8 @@
     <script src="/frontend/js/swiper-bundle.min.js"></script>
 
     <script src="/frontend/js/main.js"></script> 
+    
+    <!-- Sistema de transiciones de página -->
+    <script src="/frontend/js/page-transitions.js"></script>
   </body>
 </html>

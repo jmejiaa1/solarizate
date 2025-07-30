@@ -523,11 +523,11 @@ async function handleCrearHogar(event) {
 function resetFormulario() {
   // Validar arrays antes de usar
   const panelesOptions = Array.isArray(panelesSolares) && panelesSolares.length > 0 
-    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}W generados</option>`).join('')
+    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}kw/h generados</option>`).join('')
     : '<option value="">No hay paneles disponibles</option>';
 
   const electroOptions = Array.isArray(electrodomesticos) && electrodomesticos.length > 0
-    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} W</option>`).join('')
+    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} kw/h</option>`).join('')
     : '<option value="">No hay electrodomésticos disponibles</option>';
 
   // Resetear paneles a uno solo
@@ -680,9 +680,9 @@ function mostrarHogares(hogares) {
               </div>
               <p class="efficiency-text">Eficiencia: ${eficiencia}%</p>
               <div class="hogar-actions">
-                <button onclick="verDetalleHogar(${hogar.id})" class="btn-info">Ver Detalle</button>
-                <button onclick="editarHogar(${hogar.id})" class="btn-edit">Editar</button>
-                <button onclick="eliminarHogar(${hogar.id})" class="btn-danger">Eliminar</button>
+                <button onclick="verDetalleHogar(${hogar.id})" class="btn-info" data-tooltip="Ver información detallada">👁️ Ver Detalle</button>
+                <button onclick="editarHogar(${hogar.id})" class="btn-edit" data-tooltip="Modificar configuración del hogar">✏️ Editar</button>
+                <button onclick="eliminarHogar(${hogar.id})" class="btn-danger" data-tooltip="Eliminar hogar permanentemente">🗑️ Eliminar</button>
               </div>
             </div>
           `;
@@ -743,6 +743,20 @@ async function verDetalleHogar(id) {
     `;
     
     document.body.appendChild(modal);
+    
+    // Forzar reflow para que las transiciones funcionen
+    modal.offsetHeight;
+    
+    // Agregar clase para animación de entrada
+    modal.classList.add('modal-show');
+    
+    // Agregar listener para cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        cerrarModal();
+      }
+    });
+    
   } catch (error) {
     console.error('Error al cargar detalle del hogar:', error);
     alert('Error al cargar los detalles del hogar');
@@ -778,25 +792,485 @@ function generarRecomendaciones(hogar) {
 function cerrarModal() {
   const modal = document.querySelector('.modal-overlay');
   if (modal) {
-    modal.remove();
+    // Agregar clase de animación de salida
+    modal.classList.add('modal-hide');
+    modal.classList.remove('modal-show');
+    
+    // Esperar a que termine la animación antes de remover del DOM
+    setTimeout(() => {
+      if (modal.parentNode) {
+        modal.remove();
+      }
+    }, 300); // Coincide con la duración de la transición CSS
   }
 }
 
 // Función para editar hogar
 async function editarHogar(id) {
-  // Implementar lógica de edición
-  alert('Función de edición en desarrollo');
+  try {
+    console.log('Cargando datos del hogar para editar:', id);
+    
+    // Obtener datos actuales del hogar
+    const response = await fetch(`${HOGAR_API_URL}/${id}`);
+    if (!response.ok) {
+      throw new Error(`Error al cargar hogar: ${response.status}`);
+    }
+    
+    const hogar = await response.json();
+    console.log('Datos del hogar cargados:', hogar);
+    
+    // Crear y mostrar modal de edición
+    mostrarModalEdicion(hogar);
+    
+  } catch (error) {
+    console.error('Error al cargar hogar para edición:', error);
+    alert('Error al cargar los datos del hogar: ' + error.message);
+  }
+}
+
+// Función para mostrar el modal de edición
+function mostrarModalEdicion(hogar) {
+  // Validar que los datos estén disponibles
+  const regionesOptions = Array.isArray(regiones) && regiones.length > 0 
+    ? regiones.map(region => `<option value="${region.id}" ${region.id == hogar.fk_region ? 'selected' : ''}>${region.nombre}</option>`).join('')
+    : '<option value="">No hay regiones disponibles</option>';
+
+  const panelesOptions = Array.isArray(panelesSolares) && panelesSolares.length > 0 
+    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}Kw/h generados</option>`).join('')
+    : '<option value="">No hay paneles disponibles</option>';
+
+  const electroOptions = Array.isArray(electrodomesticos) && electrodomesticos.length > 0
+    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} kw/h</option>`).join('')
+    : '<option value="">No hay electrodomésticos disponibles</option>';
+
+  // Crear modal
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'modal-editar-hogar';
+  
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✏️ Editar Hogar</h3>
+        <button onclick="cerrarModalEdicion()" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="editarHogarForm">
+          <input type="hidden" id="edit-hogar-id" value="${hogar.id}">
+          
+          <div class="form-group">
+            <label for="edit-direccion">📍 Dirección:</label>
+            <input type="text" id="edit-direccion" name="direccion" value="${hogar.direccion || ''}" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-ciudad">🏙️ Ciudad:</label>
+            <input type="text" id="edit-ciudad" name="ciudad" value="${hogar.ciudad || ''}" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-region">🌍 Región:</label>
+            <select id="edit-region" name="fk_region" required>
+              <option value="">Seleccione una región</option>
+              ${regionesOptions}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <h4>⚡ Paneles Solares</h4>
+            <div id="edit-paneles-container">
+              <!-- Los paneles se cargarán dinámicamente -->
+            </div>
+            <button type="button" onclick="agregarPanelEdicion()">➕ Agregar Panel</button>
+          </div>
+
+          <div class="form-group">
+            <h4>🔌 Electrodomésticos</h4>
+            <div id="edit-electrodomesticos-container">
+              <!-- Los electrodomésticos se cargarán dinámicamente -->
+            </div>
+            <button type="button" onclick="agregarElectrodomesticoEdicion()">➕ Agregar Electrodoméstico</button>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-generacion-estimada">⚡ Generación Estimada (W):</label>
+            <input type="number" id="edit-generacion-estimada" name="generacion_estimada" readonly value="${hogar.generacion_estimada || 0}">
+          </div>
+
+          <div class="form-group">
+            <label for="edit-consumo-estimado">🔌 Consumo Estimado (W):</label>
+            <input type="number" id="edit-consumo-estimado" name="consumo_estimado" readonly value="${hogar.consumo_estimado || 0}">
+          </div>
+
+          <div class="hogar-actions">
+            <button type="submit" class="btn-edit">💾 Guardar Cambios</button>
+            <button type="button" onclick="cerrarModalEdicion()" class="btn-secondary">❌ Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  // Agregar modal al DOM
+  document.body.appendChild(modal);
+  
+  // Forzar reflow para que las transiciones funcionen
+  modal.offsetHeight;
+  
+  // Agregar clase para animación de entrada
+  modal.classList.add('modal-show');
+  
+  // Agregar listener para cerrar al hacer clic fuera del modal
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      cerrarModalEdicion();
+    }
+  });
+  
+  // Cargar los paneles y electrodomésticos existentes del hogar
+  cargarPanelesExistentes(hogar.id);
+  cargarElectrodomesticosExistentes(hogar.id);
+  
+  // Agregar event listener para el formulario
+  const form = document.getElementById('editarHogarForm');
+  form.addEventListener('submit', handleActualizarHogar);
+  
+  // Agregar listeners para cálculo automático en edición
+  modal.addEventListener('change', (e) => {
+    if (e.target.name === 'edit_panel_cantidad' || e.target.name === 'edit_electrodomestico_cantidad' ||
+        e.target.name === 'edit_panel_id' || e.target.name === 'edit_electrodomestico_id') {
+      calcularEstimadosEdicion();
+    }
+  });
+}
+
+// Función para cargar paneles existentes del hogar
+async function cargarPanelesExistentes(hogarId) {
+  try {
+    // Aquí deberías hacer una llamada para obtener los paneles del hogar específico
+    // Por ahora, agregaremos un panel vacío como ejemplo
+    const container = document.getElementById('edit-paneles-container');
+    
+    const panelesOptions = Array.isArray(panelesSolares) && panelesSolares.length > 0 
+      ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}W generados</option>`).join('')
+      : '<option value="">No hay paneles disponibles</option>';
+    
+    // Agregar al menos un panel vacío para edición
+    container.innerHTML = `
+      <div class="panel-item">
+        <select name="edit_panel_id" required>
+          <option value="">Seleccione un panel solar</option>
+          ${panelesOptions}
+        </select>
+        <input type="number" name="edit_panel_cantidad" placeholder="Cantidad" min="1" required>
+        <button type="button" onclick="eliminarPanelEdicion(this)">❌ Eliminar</button>
+      </div>
+    `;
+    
+  } catch (error) {
+    console.error('Error al cargar paneles existentes:', error);
+  }
+}
+
+// Función para cargar electrodomésticos existentes del hogar
+async function cargarElectrodomesticosExistentes(hogarId) {
+  try {
+    const container = document.getElementById('edit-electrodomesticos-container');
+    
+    const electroOptions = Array.isArray(electrodomesticos) && electrodomesticos.length > 0
+      ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} W</option>`).join('')
+      : '<option value="">No hay electrodomésticos disponibles</option>';
+    
+    // Agregar al menos un electrodoméstico vacío para edición
+    container.innerHTML = `
+      <div class="electrodomestico-item">
+        <select name="edit_electrodomestico_id" required>
+          <option value="">Seleccione un electrodoméstico</option>
+          ${electroOptions}
+        </select>
+        <input type="number" name="edit_electrodomestico_cantidad" placeholder="Cantidad" min="1" required>
+        <button type="button" onclick="eliminarElectrodomesticoEdicion(this)">❌ Eliminar</button>
+      </div>
+    `;
+    
+  } catch (error) {
+    console.error('Error al cargar electrodomésticos existentes:', error);
+  }
+}
+
+// Función para agregar panel en edición
+function agregarPanelEdicion() {
+  const container = document.getElementById('edit-paneles-container');
+  if (!container) return;
+
+  const panelesOptions = Array.isArray(panelesSolares) && panelesSolares.length > 0 
+    ? panelesSolares.map(panel => `<option value="${panel.id}" data-energia="${panel.energia_generada}">${panel.tipo} (${panel.potencia}W) - ${panel.energia_generada}W generados</option>`).join('')
+    : '<option value="">No hay paneles disponibles</option>';
+
+  const newPanel = document.createElement('div');
+  newPanel.className = 'panel-item';
+  newPanel.innerHTML = `
+    <select name="edit_panel_id" required>
+      <option value="">Seleccione un panel solar</option>
+      ${panelesOptions}
+    </select>
+    <input type="number" name="edit_panel_cantidad" placeholder="Cantidad" min="1" required>
+    <button type="button" onclick="eliminarPanelEdicion(this)">❌ Eliminar</button>
+  `;
+  container.appendChild(newPanel);
+}
+
+// Función para eliminar panel en edición
+function eliminarPanelEdicion(button) {
+  const container = document.getElementById('edit-paneles-container');
+  if (container && container.children.length > 1) {
+    button.parentElement.remove();
+    calcularEstimadosEdicion();
+  } else {
+    alert('Debe mantener al menos un panel solar');
+  }
+}
+
+// Función para agregar electrodoméstico en edición
+function agregarElectrodomesticoEdicion() {
+  const container = document.getElementById('edit-electrodomesticos-container');
+  if (!container) return;
+
+  const electroOptions = Array.isArray(electrodomesticos) && electrodomesticos.length > 0
+    ? electrodomesticos.map(electro => `<option value="${electro.id}" data-consumo="${electro.consumo}">${electro.nombre} - ${electro.consumo} W</option>`).join('')
+    : '<option value="">No hay electrodomésticos disponibles</option>';
+
+  const newElectro = document.createElement('div');
+  newElectro.className = 'electrodomestico-item';
+  newElectro.innerHTML = `
+    <select name="edit_electrodomestico_id" required>
+      <option value="">Seleccione un electrodoméstico</option>
+      ${electroOptions}
+    </select>
+    <input type="number" name="edit_electrodomestico_cantidad" placeholder="Cantidad" min="1" required>
+    <button type="button" onclick="eliminarElectrodomesticoEdicion(this)">❌ Eliminar</button>
+  `;
+  container.appendChild(newElectro);
+}
+
+// Función para eliminar electrodoméstico en edición
+function eliminarElectrodomesticoEdicion(button) {
+  const container = document.getElementById('edit-electrodomesticos-container');
+  if (container && container.children.length > 1) {
+    button.parentElement.remove();
+    calcularEstimadosEdicion();
+  } else {
+    alert('Debe mantener al menos un electrodoméstico');
+  }
+}
+
+// Función para calcular estimados en el modal de edición
+function calcularEstimadosEdicion() {
+  let generacionTotal = 0;
+  let consumoTotal = 0;
+
+  // Calcular generación de paneles solares
+  const panelesItems = document.querySelectorAll('#edit-paneles-container .panel-item');
+  panelesItems.forEach(item => {
+    const select = item.querySelector('select[name="edit_panel_id"]');
+    const cantidad = item.querySelector('input[name="edit_panel_cantidad"]');
+    
+    if (select && select.value && cantidad && cantidad.value) {
+      const energia = parseFloat(select.options[select.selectedIndex].dataset.energia || 0);
+      generacionTotal += energia * parseInt(cantidad.value);
+    }
+  });
+
+  // Calcular consumo de electrodomésticos
+  const electroItems = document.querySelectorAll('#edit-electrodomesticos-container .electrodomestico-item');
+  electroItems.forEach(item => {
+    const select = item.querySelector('select[name="edit_electrodomestico_id"]');
+    const cantidad = item.querySelector('input[name="edit_electrodomestico_cantidad"]');
+    
+    if (select && select.value && cantidad && cantidad.value) {
+      const consumo = parseFloat(select.options[select.selectedIndex].dataset.consumo || 0);
+      consumoTotal += consumo * parseInt(cantidad.value);
+    }
+  });
+
+  // Actualizar campos
+  const generacionInput = document.getElementById('edit-generacion-estimada');
+  const consumoInput = document.getElementById('edit-consumo-estimado');
+  
+  if (generacionInput) generacionInput.value = generacionTotal;
+  if (consumoInput) consumoInput.value = consumoTotal;
+}
+
+// Función para manejar la actualización del hogar
+async function handleActualizarHogar(event) {
+  event.preventDefault();
+  
+  const formData = new FormData(event.target);
+  const hogarId = document.getElementById('edit-hogar-id').value;
+  
+  // Recopilar datos de paneles
+  const paneles = [];
+  const panelesItems = document.querySelectorAll('#edit-paneles-container .panel-item');
+  panelesItems.forEach(item => {
+    const panelSelect = item.querySelector('select[name="edit_panel_id"]');
+    const cantidadInput = item.querySelector('input[name="edit_panel_cantidad"]');
+    
+    if (panelSelect && panelSelect.value && cantidadInput && cantidadInput.value) {
+      const energia_generada = parseFloat(panelSelect.options[panelSelect.selectedIndex].dataset.energia || 0);
+      paneles.push({
+        panel_id: parseInt(panelSelect.value),
+        cantidad: parseInt(cantidadInput.value),
+        energia_generada: energia_generada
+      });
+    }
+  });
+
+  // Recopilar datos de electrodomésticos
+  const electrodomesticosData = [];
+  const electroItems = document.querySelectorAll('#edit-electrodomesticos-container .electrodomestico-item');
+  electroItems.forEach(item => {
+    const electroSelect = item.querySelector('select[name="edit_electrodomestico_id"]');
+    const cantidadInput = item.querySelector('input[name="edit_electrodomestico_cantidad"]');
+    
+    if (electroSelect && electroSelect.value && cantidadInput && cantidadInput.value) {
+      const consumo = parseFloat(electroSelect.options[electroSelect.selectedIndex].dataset.consumo || 0);
+      electrodomesticosData.push({
+        electrodomestico_id: parseInt(electroSelect.value),
+        cantidad: parseInt(cantidadInput.value),
+        consumo: consumo
+      });
+    }
+  });
+  
+  const hogarData = {
+    direccion: formData.get('direccion'),
+    ciudad: formData.get('ciudad'),
+    fk_region: parseInt(formData.get('fk_region')),
+    fk_usuario: currentUser.id,
+    generacion_estimada: parseFloat(document.getElementById('edit-generacion-estimada').value) || 0,
+    consumo_estimado: parseFloat(document.getElementById('edit-consumo-estimado').value) || 0,
+    paneles: paneles,
+    electrodomesticos: electrodomesticosData
+  };
+
+  try {
+    console.log('Actualizando hogar:', hogarId, hogarData);
+    
+    const response = await fetch(`${HOGAR_API_URL}/${hogarId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(hogarData)
+    });
+
+    if (response.ok) {
+      const hogarActualizado = await response.json();
+      console.log('Hogar actualizado exitosamente:', hogarActualizado);
+      
+      alert('✅ Hogar actualizado exitosamente');
+      
+      // Cerrar modal
+      cerrarModalEdicion();
+      
+      // Recargar lista de hogares
+      await cargarHogares();
+      
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error al actualizar el hogar');
+    }
+  } catch (error) {
+    console.error('Error al actualizar hogar:', error);
+    alert('❌ Error al actualizar el hogar: ' + error.message);
+  }
+}
+
+// Función para cerrar el modal de edición
+function cerrarModalEdicion() {
+  const modal = document.getElementById('modal-editar-hogar');
+  if (modal) {
+    // Agregar clase de animación de salida
+    modal.classList.add('modal-hide');
+    modal.classList.remove('modal-show');
+    
+    // Esperar a que termine la animación antes de remover del DOM
+    setTimeout(() => {
+      if (modal.parentNode) {
+        modal.remove();
+      }
+    }, 300); // Coincide con la duración de la transición CSS
+  }
 }
 
 // Función para eliminar hogar
-// Función para eliminar hogar
 async function eliminarHogar(id) {
-  if (!confirm('¿Estás seguro de que quieres eliminar este hogar? Esta acción no se puede deshacer.')) {
-    return;
-  }
+  // Crear modal de confirmación personalizado
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'modal-confirmar-eliminacion';
+  
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>🗑️ Confirmar Eliminación</h3>
+        <button onclick="cerrarModalConfirmacion()" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="text-align: center; padding: 2rem 1rem;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+          <h4 style="color: #f44336; margin-bottom: 1rem;">¿Estás seguro?</h4>
+          <p style="color: #fff; margin-bottom: 2rem; line-height: 1.6;">
+            Esta acción <strong>eliminará permanentemente</strong> este hogar junto con toda su configuración de paneles solares y electrodomésticos.
+            <br><br>
+            <strong>Esta acción no se puede deshacer.</strong>
+          </p>
+          
+          <div class="hogar-actions">
+            <button onclick="confirmarEliminacion(${id})" class="btn-danger">
+              🗑️ Sí, Eliminar
+            </button>
+            <button onclick="cerrarModalConfirmacion()" class="btn-secondary">
+              ❌ Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 
+  document.body.appendChild(modal);
+  
+  // Forzar reflow para que las transiciones funcionen
+  modal.offsetHeight;
+  
+  // Agregar clase para animación de entrada
+  modal.classList.add('modal-show');
+  
+  // Agregar listener para cerrar al hacer clic fuera del modal
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      cerrarModalConfirmacion();
+    }
+  });
+}
+
+// Función para confirmar la eliminación
+async function confirmarEliminacion(id) {
   try {
-    console.log(`Intentando eliminar hogar con ID: ${id}`);
+    console.log(`Eliminando hogar con ID: ${id}`);
+    
+    // Mostrar indicador de carga
+    const modal = document.getElementById('modal-confirmar-eliminacion');
+    const modalBody = modal.querySelector('.modal-body');
+    modalBody.innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <div class="loading-spinner" style="margin: 0 auto 1rem;"></div>
+        <p style="color: #fff;">Eliminando hogar...</p>
+      </div>
+    `;
     
     const response = await fetch(`${HOGAR_API_URL}/${id}`, {
       method: 'DELETE',
@@ -810,18 +1284,90 @@ async function eliminarHogar(id) {
     if (response.ok) {
       const result = await response.json();
       console.log('Hogar eliminado exitosamente:', result);
-      alert('Hogar eliminado exitosamente');
       
-      // Recargar la lista de hogares
-      await cargarHogares();
+      // Mostrar mensaje de éxito
+      modalBody.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+          <div style="font-size: 4rem; margin-bottom: 1rem; color: #4CAF50;">✅</div>
+          <h4 style="color: #4CAF50; margin-bottom: 1rem;">¡Eliminado exitosamente!</h4>
+          <p style="color: #fff; margin-bottom: 2rem;">
+            El hogar ha sido eliminado permanentemente de tu cuenta.
+          </p>
+          <button onclick="cerrarModalConfirmacion()" class="btn-secondary">
+            👍 Entendido
+          </button>
+        </div>
+      `;
+      
+      // Recargar la lista de hogares después de 2 segundos
+      setTimeout(async () => {
+        await cargarHogares();
+        cerrarModalConfirmacion();
+      }, 2000);
+      
     } else {
       const errorData = await response.json();
       console.error('Error del servidor:', errorData);
-      throw new Error(errorData.error || `Error del servidor: ${response.status}`);
+      
+      // Mostrar mensaje de error
+      modalBody.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+          <div style="font-size: 4rem; margin-bottom: 1rem; color: #f44336;">❌</div>
+          <h4 style="color: #f44336; margin-bottom: 1rem;">Error al eliminar</h4>
+          <p style="color: #fff; margin-bottom: 2rem;">
+            ${errorData.error || `Error del servidor: ${response.status}`}
+          </p>
+          <div class="hogar-actions">
+            <button onclick="eliminarHogar(${id})" class="btn-danger">
+              🔄 Reintentar
+            </button>
+            <button onclick="cerrarModalConfirmacion()" class="btn-secondary">
+              ❌ Cancelar
+            </button>
+          </div>
+        </div>
+      `;
     }
   } catch (error) {
     console.error('Error al eliminar hogar:', error);
-    alert(`Error al eliminar el hogar: ${error.message}`);
+    
+    // Mostrar mensaje de error de conexión
+    const modal = document.getElementById('modal-confirmar-eliminacion');
+    const modalBody = modal.querySelector('.modal-body');
+    modalBody.innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; color: #f44336;">🔌</div>
+        <h4 style="color: #f44336; margin-bottom: 1rem;">Error de conexión</h4>
+        <p style="color: #fff; margin-bottom: 2rem;">
+          No se pudo conectar con el servidor. Verifica tu conexión a internet.
+        </p>
+        <div class="hogar-actions">
+          <button onclick="eliminarHogar(${id})" class="btn-danger">
+            🔄 Reintentar
+          </button>
+          <button onclick="cerrarModalConfirmacion()" class="btn-secondary">
+            ❌ Cancelar
+          </button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Función para cerrar modal de confirmación
+function cerrarModalConfirmacion() {
+  const modal = document.getElementById('modal-confirmar-eliminacion');
+  if (modal) {
+    // Agregar clase de animación de salida
+    modal.classList.add('modal-hide');
+    modal.classList.remove('modal-show');
+    
+    // Esperar a que termine la animación antes de remover del DOM
+    setTimeout(() => {
+      if (modal.parentNode) {
+        modal.remove();
+      }
+    }, 300); // Coincide con la duración de la transición CSS
   }
 }
 

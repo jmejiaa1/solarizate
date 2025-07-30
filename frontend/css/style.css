@@ -1,5 +1,67 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;900&display=swap");
 
+/* Efectos de transición de página */
+.page-transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #183da4 0%, #08174a 100%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-transition.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.page-transition-content {
+  text-align: center;
+  color: #fff;
+}
+
+.page-transition-spinner {
+  width: 60px;
+  height: 60px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.page-transition-text {
+  font-size: 1.2rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Animación de entrada de página */
+.page-fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /*base*/
 * {
   box-sizing: border-box;
@@ -968,7 +1030,6 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background 0.3s;
 }
 
 .panel-item button:hover,
@@ -987,7 +1048,6 @@ button[type="button"] {
     font-size: 1rem;
     margin-right: 1rem;
     margin-bottom: 0.5rem;
-    transition: background 0.3s;
 }
 
 button[type="submit"]:hover,
@@ -1042,14 +1102,13 @@ button[type="button"]:hover {
     border-radius: 15px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.3s, box-shadow 0.3s;
     position: relative;
     overflow: hidden;
 }
 
 .hogar-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .hogar-card h4 {
@@ -1100,8 +1159,7 @@ button[type="button"]:hover {
 
 .efficiency-fill {
     height: 100%;
-    background: linear-gradient(90deg, #f44336 0%, #FF9800 50%, #4CAF50 100%);
-    transition: width 0.3s ease;
+    background: #4CAF50;
 }
 
 .efficiency-text {
@@ -1136,17 +1194,48 @@ button[type="button"]:hover {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .modal-content {
     background: linear-gradient(135deg, #183da4 0%, #08174a 100%);
     padding: 2rem;
     border-radius: 15px;
-    max-width: 600px;
-    width: 90%;
+    max-width: 800px;
+    width: 95%;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Scroll personalizado */
+    scrollbar-width: thin;
+    scrollbar-color: #4CAF50 rgba(255, 255, 255, 0.1);
+    /* Transiciones sutiles */
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+}
+
+/* Scroll personalizado para Webkit */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #4CAF50;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #45a049;
 }
 
 .modal-header {
@@ -1161,12 +1250,32 @@ button[type="button"]:hover {
 .modal-header h3 {
     color: #fff;
     margin: 0;
+    font-size: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Regla general para botones de modal */
+.modal-overlay .hogar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.modal-overlay .hogar-actions button {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .close-btn {
-    background: none;
-    border: none;
-    font-size: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    font-size: 1.5rem;
     color: #fff;
     cursor: pointer;
     padding: 0;
@@ -1175,11 +1284,292 @@ button[type="button"]:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
 }
 
 .close-btn:hover {
+    background: rgba(244, 67, 54, 0.8);
+    border-color: #f44336;
+}
+
+/* Estados activos para animaciones de modal */
+.modal-overlay.modal-show {
+    opacity: 1;
+}
+
+.modal-overlay.modal-show .modal-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.modal-overlay.modal-hide {
+    opacity: 0;
+}
+
+.modal-overlay.modal-hide .modal-content {
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+}
+
+/* Estilos específicos para el modal de edición */
+#modal-editar-hogar .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#modal-editar-hogar .form-group label {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+    display: block;
+    font-size: 1rem;
+}
+
+#modal-editar-hogar .form-group input,
+#modal-editar-hogar .form-group select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    font-size: 1rem;
+}
+
+#modal-editar-hogar .form-group input:focus,
+#modal-editar-hogar .form-group select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    background: #fff;
+}
+
+#modal-editar-hogar .form-group input[readonly] {
+    background: rgba(255, 255, 255, 0.7);
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Estilos para secciones de paneles y electrodomésticos en edición */
+#modal-editar-hogar h4 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(76, 175, 80, 0.3);
+    font-size: 1.2rem;
+}
+
+#edit-paneles-container,
+#edit-electrodomesticos-container {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#modal-editar-hogar .panel-item,
+#modal-editar-hogar .electrodomestico-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: end;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#modal-editar-hogar .panel-item button,
+#modal-editar-hogar .electrodomestico-item button {
+    background: #f44336;
+    color: white;
+    padding: 0.8rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#modal-editar-hogar .panel-item button:hover,
+#modal-editar-hogar .electrodomestico-item button:hover {
+    background: #d32f2f;
+}
+
+/* Botones de agregar */
+#modal-editar-hogar button[onclick*="agregarPanel"],
+#modal-editar-hogar button[onclick*="agregarElectrodomestico"] {
+    background: #4CAF50;
+    color: white;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+#modal-editar-hogar button[onclick*="agregarPanel"]:hover,
+#modal-editar-hogar button[onclick*="agregarElectrodomestico"]:hover {
+    background: #45a049;
+}
+
+/* Botones de acción del modal */
+#modal-editar-hogar .hogar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#modal-editar-hogar .hogar-actions button {
+    width: 100%;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#modal-editar-hogar .btn-edit {
+    background: #FF9800;
+    color: white;
+}
+
+#modal-editar-hogar .btn-edit:hover {
+    background: #F57C00;
+}
+
+#modal-editar-hogar .btn-secondary {
+    background: #607D8B;
+    color: white;
+}
+
+#modal-editar-hogar .btn-secondary:hover {
+    background: #455A64;
+}
+
+/* Animación de carga para campos calculados */
+#edit-generacion-estimada,
+#edit-consumo-estimado {
+    background: rgba(76, 175, 80, 0.1);
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    font-weight: bold;
+}
+
+/* Estilos para modales de confirmación */
+#modal-confirmar-eliminacion .hogar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+    align-items: center;
+}
+
+#modal-confirmar-eliminacion .hogar-actions button {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Responsive para modal de edición */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+        padding: 1.5rem;
+    }
+    
+    #modal-editar-hogar .panel-item,
+    #modal-editar-hogar .electrodomestico-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    #modal-editar-hogar .hogar-actions {
+        flex-direction: column;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Estilos específicos para modal de confirmación de eliminación */
+#modal-confirmar-eliminacion .modal-content {
+    border: 2px solid #f44336;
+    box-shadow: 0 20px 60px rgba(244, 67, 54, 0.3);
+}
+
+#modal-confirmar-eliminacion .modal-header {
+    border-bottom-color: #f44336;
+}
+
+#modal-confirmar-eliminacion .modal-header h3 {
+    color: #f44336;
+}
+
+#modal-confirmar-eliminacion .btn-danger {
+    background: linear-gradient(45deg, #f44336, #d32f2f);
+    border: none;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+    transition: all 0.3s ease;
+}
+
+#modal-confirmar-eliminacion .btn-danger:hover {
+    background: linear-gradient(45deg, #d32f2f, #b71c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.6);
+}
+
+/* Animación de eliminación exitosa */
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+#modal-confirmar-eliminacion .modal-body div[style*="color: #4CAF50"] {
+    animation: successPulse 0.6s ease-in-out;
+}
+
+/* Tooltips para botones de acción */
+.hogar-actions button {
+    position: relative;
+}
+
+.hogar-actions button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.hogar-actions button:hover::after {
+    opacity: 1;
 }
 
 .detail-stats {
@@ -1316,7 +1706,6 @@ button[type="button"]:hover {
     border-radius: 8px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background 0.3s;
 }
 
 .btn-reload:hover {
@@ -1331,7 +1720,6 @@ button[type="button"]:hover {
     border-radius: 8px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background 0.3s;
 }
 
 .btn-test:hover {
@@ -1346,7 +1734,6 @@ button[type="button"]:hover {
     border-radius: 8px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background 0.3s;
 }
 
 .btn-retry:hover {
@@ -1416,7 +1803,6 @@ button[type="button"]:hover {
     border-radius: 8px;
     cursor: pointer;
     margin-top: 1rem;
-    transition: background 0.3s ease;
 }
 
 .btn-secondary:hover {

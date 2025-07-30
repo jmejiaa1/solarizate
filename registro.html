@@ -6,11 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro</title>
   <link rel="stylesheet" href="/frontend/css/styleregistro.css">
+  <link rel="stylesheet" href="/frontend/css/styleTi.css">
+  <!-- Estilos para transiciones de página -->
+  
 </head>
 
 <body>
+  <!-- Overlay de transición de página -->
+  <div class="page-transition" id="page-transition">
+    <div class="page-transition-content">
+      <div class="page-transition-spinner"></div>
+      <div class="page-transition-text">Cargando...</div>
+    </div>
+  </div>
 
-              <div class="container">
+  <main class="page-fade-in">
+    <div class="container">
 
        <div class="container">
             <div class="container-form">
@@ -20,7 +31,10 @@
             </div>
 
     </div>
+  </main>
  
+    <!-- Sistema de transiciones de página -->
+    <script src="/frontend/js/page-transitions.js"></script>
     <script src="frontend/js/pages/registro.js"></script>
   
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>

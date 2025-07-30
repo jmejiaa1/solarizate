@@ -113,7 +113,7 @@ async function handleLogin(event) {
             
             // Redirigir después de 3 segundos
             setTimeout(() => {
-                window.location.href = 'usuario.html'; // Cambia esto por tu página principal
+                window.location.href = 'usuario.html'; 
             }, 3000);
             
         } else {

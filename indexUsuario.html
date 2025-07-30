@@ -17,6 +17,14 @@
     <title>Solarizate</title>
   </head>
   <body>
+    <!-- Overlay de transición de página -->
+    <div class="page-transition" id="page-transition">
+      <div class="page-transition-content">
+        <div class="page-transition-spinner"></div>
+        <div class="page-transition-text">Cargando...</div>
+      </div>
+    </div>
+
     <!--Header-->
 
     <header class="header" id="header">
@@ -38,13 +46,13 @@
 
 
                <li class="navItem">
-              <a href="#" onclick="cerrarSesion()" class="navLink active-link"> Cerrar Sesión </a>
+              <a href="#" onclick="cerrarSesionConTransicion()" class="navLink active-link">Salir</a>
             </li>
 
             <li class="navItem">
              <!-- Mostrar solo el nombre de usuario en la barra de navegación -->
             <script>
-              // Suponiendo que los datos del usuario están guardados en localStorage como JSON
+              // los datos del usuario están guardados en localStorage como JSON
               document.addEventListener("DOMContentLoaded", function() {
               const userData = localStorage.getItem("currentUser");
               if (userData) {
@@ -77,7 +85,7 @@
       </nav>
     </header>
 
-
+    <main class="page-fade-in">
     <section class="home container" id="home">
         <div class="swiper home-swiper">
           <div class="swiper-wrapper">
@@ -399,6 +407,9 @@
     <script src="/frontend/js/swiper-bundle.min.js"></script>
 
     <script src="/frontend/js/main.js"></script> 
+    
+    <!-- Sistema de transiciones de página -->
+    <script src="/frontend/js/page-transitions.js"></script>
 
     <!-- Sistema de autenticación -->
     <script src="/frontend/js/auth.js"></script>
