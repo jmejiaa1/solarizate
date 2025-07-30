@@ -1543,7 +1543,7 @@ async function eliminarHogar(id) {
       <div class="modal-body">
         <div style="text-align: center; padding: 2rem 1rem;">
           <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
-          <h4 style="color: #f44336; margin-bottom: 1rem;">¿Estás seguro?</h4>
+          <h4 style="color: #f9f4f4ff; margin-bottom: 1rem;">¿Estás seguro?</h4>
           <p style="color: #fff; margin-bottom: 2rem; line-height: 1.6;">
             Esta acción <strong>eliminará permanentemente</strong> este hogar junto con toda su configuración de paneles solares y electrodomésticos.
             <br><br>
